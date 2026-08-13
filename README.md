@@ -696,14 +696,14 @@ Como REST, React e WebSocket utilizarão a mesma aplicação/porta, apenas uma o
 
 A primeira versão deverá conter apenas:
 
-* [ ] Criar/acessar pad através de slug
-* [ ] Editor de texto
-* [ ] Persistência SQLite
-* [ ] API REST
-* [ ] WebSocket
-* [ ] Atualização em tempo real
-* [ ] React Router
-* [ ] Spring Boot servindo o frontend
+* [x] Criar/acessar pad através de slug
+* [x] Editor de texto
+* [x] Persistência SQLite
+* [x] API REST
+* [x] WebSocket
+* [x] Atualização em tempo real
+* [x] React Router
+* [x] Spring Boot servindo o frontend
 * [ ] Docker
 * [ ] Volume persistente
 

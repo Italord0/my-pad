@@ -1,6 +1,8 @@
 package com.mypad.controller
 
 import com.mypad.service.PadService
+import com.mypad.websocket.PadSocketMessage
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -41,6 +43,7 @@ data class PadUpdateRequest(
 @RequestMapping("/api")
 class PadController(
     private val padService: PadService,
+    private val messagingTemplate: SimpMessagingTemplate,
 ) {
 
     @GetMapping("/pads/{slug}")
@@ -50,8 +53,17 @@ class PadController(
     }
 
     @PutMapping("/pads/{slug}")
-    fun updatePad(@PathVariable slug: String, @RequestBody request: PadUpdateRequest): PadResponse {
+    fun updatePad(
+        @PathVariable slug: String,
+        @RequestBody request: PadUpdateRequest,
+        @org.springframework.web.bind.annotation.RequestHeader("X-Sender-Id", required = false) senderId: String?,
+    ): PadResponse {
         val pad = padService.update(slug, request.content)
+        // Broadcast update to websocket subscribers so REST updates propagate immediately
+        messagingTemplate.convertAndSend(
+            "/topic/pads/$slug",
+            PadSocketMessage(type = "update", content = pad.content, senderId = senderId),
+        )
         return PadResponse.fromPad(pad.slug, pad.content, pad.createdAt, pad.updatedAt)
     }
 }

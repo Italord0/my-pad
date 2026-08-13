@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller
 data class PadSocketMessage(
     val type: String,
     val content: String,
+    val senderId: String? = null,
 )
 
 @Controller
@@ -26,6 +27,6 @@ class PadSocketController(
             padService.update(slug, message.content)
         }
 
-        return PadSocketMessage(type = "update", content = padService.getOrCreate(slug).content)
+        return PadSocketMessage(type = "update", content = padService.getOrCreate(slug).content, senderId = message.senderId)
     }
 }

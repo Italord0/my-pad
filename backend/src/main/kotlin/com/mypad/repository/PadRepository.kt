@@ -7,6 +7,7 @@ import java.time.Instant
 
 interface PadRepository {
     fun findBySlug(slug: String): Pad?
+    fun findChildren(parentSlug: String): List<String>
     fun save(pad: Pad): Pad
 }
 
@@ -41,6 +42,28 @@ class JdbcPadRepository(
             },
             slug,
         ).firstOrNull()
+    }
+
+    override fun findChildren(parentSlug: String): List<String> {
+        val prefix = if (parentSlug.isEmpty()) "" else "$parentSlug/"
+        val rows = jdbcTemplate.query(
+            "SELECT slug FROM pads WHERE slug LIKE ?",
+            { rs, _ -> rs.getString("slug") },
+            "$prefix%",
+        )
+
+        // extract immediate child segments
+        val children = rows.mapNotNull { full ->
+            if (parentSlug.isEmpty()) {
+                // top-level: take first segment
+                full.split('/').firstOrNull()
+            } else if (full.startsWith(prefix)) {
+                val rest = full.substring(prefix.length)
+                rest.split('/').firstOrNull()?.let { seg -> "$parentSlug/$seg" }
+            } else null
+        }.distinct()
+
+        return children
     }
 
     override fun save(pad: Pad): Pad {

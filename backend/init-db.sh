@@ -2,7 +2,7 @@
 set -euo pipefail
 
 mkdir -p "$(dirname "$0")/data"
-DB_FILE="$(dirname "$0")/data/dontpad.db"
+DB_FILE="$(dirname "$0")/data/mypad.db"
 
 if [ ! -f "$DB_FILE" ]; then
   touch "$DB_FILE"

@@ -17,10 +17,10 @@ class PadSocketController(
     private val padService: PadService,
 ) {
 
-    @MessageMapping("/pads/{slug}")
+    @MessageMapping("/pads/{slug:.+}")
     @SendTo("/topic/pads/{slug}")
     fun handleUpdate(
-        @DestinationVariable slug: String,
+        @DestinationVariable("slug") slug: String,
         message: PadSocketMessage,
     ): PadSocketMessage {
         if (message.type == "update") {

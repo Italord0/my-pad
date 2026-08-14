@@ -8,6 +8,7 @@ const WS_BASE = 'http://localhost:8080/ws/pads'
 
 function App() {
   const [content, setContent] = useState('')
+  const [children, setChildren] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const saveTimeoutRef = useRef(null)
   const stompClientRef = useRef(null)
@@ -34,16 +35,25 @@ function App() {
   }
 
   const slug = useMemo(() => {
-    const path = window.location.pathname.replace(/^\//, '') || 'meu-pad'
-    return path
+    const path = window.location.pathname.replace(/^\//, '')
+    return path === '' ? null : path
   }, [])
 
   useEffect(() => {
     const loadPad = async () => {
+      if (!slug) {
+        // root: show welcome screen
+        setContent('')
+        setChildren([])
+        setIsLoading(false)
+        return
+      }
+
       try {
-        const response = await fetch(`${API_BASE}/pads/${encodeURIComponent(slug)}`)
+        const response = await fetch(`${API_BASE}/pads/${encodeURI(slug)}`)
         const pad = await response.json()
         setContent(pad.content || '')
+        setChildren(pad.children || [])
       } catch (error) {
         console.error('Erro ao carregar o pad', error)
       } finally {
@@ -160,15 +170,27 @@ function App() {
             }
 
             if (el && document.activeElement === el && now - (lastLocalEditRef.current || 0) < REMOTE_APPLY_DELAY) {
-              // buffer remote update
-              pendingRemoteRef.current = payload.content
+              // buffer remote update but only apply when the user truly idles
+              pendingRemoteRef.current = { content: payload.content, ts: now }
               if (pendingApplyTimerRef.current) clearTimeout(pendingApplyTimerRef.current)
-              pendingApplyTimerRef.current = setTimeout(() => {
-                const remote = pendingRemoteRef.current
+
+              const scheduleApply = () => {
+                const pending = pendingRemoteRef.current
+                if (!pending) return
+                // if the editor is focused and there were recent local edits, defer
+                const elapsedSinceLocal = Date.now() - (lastLocalEditRef.current || 0)
+                if (document.activeElement === el && elapsedSinceLocal < REMOTE_APPLY_DELAY) {
+                  pendingApplyTimerRef.current = setTimeout(scheduleApply, REMOTE_APPLY_DELAY)
+                  return
+                }
+
+                // safe to apply
                 pendingRemoteRef.current = null
                 pendingApplyTimerRef.current = null
-                if (remote != null) applyRemote(remote)
-              }, REMOTE_APPLY_DELAY)
+                applyRemote(pending.content)
+              }
+
+              pendingApplyTimerRef.current = setTimeout(scheduleApply, REMOTE_APPLY_DELAY)
             } else {
               // apply immediately
               applyRemote(payload.content)
@@ -205,7 +227,7 @@ function App() {
   }, [content, isLoading])
 
   useEffect(() => {
-    if (isLoading) return undefined
+    if (isLoading || !slug) return undefined
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
@@ -220,7 +242,7 @@ function App() {
 
       savingRef.current = true
       try {
-        const res = await fetch(`${API_BASE}/pads/${encodeURIComponent(slug)}`, {
+        const res = await fetch(`${API_BASE}/pads/${encodeURI(slug)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'X-Sender-Id': clientIdRef.current },
           body: JSON.stringify({ content: latestContent }),
@@ -295,12 +317,59 @@ function App() {
 
   return (
     <main className="app-shell">
-      <div
-        ref={editorRef}
-        className="editor"
-        contentEditable={!isLoading}
-        suppressContentEditableWarning
-        onInput={(event) => {
+      {!slug ? (
+        <div className="welcome">
+          <div className="welcome-box">
+            <h1>Welcome to MyPad</h1>
+            <div className="welcome-actions">
+            <p>mypad.italomelo.dev/</p>
+              <input
+                aria-label="slug"
+                className="slug-input"
+                placeholder="your-secret-page"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const v = e.currentTarget.value.trim().replace(/^\/+|\/+$/g, '')
+                    if (v) window.location.href = `/${encodeURI(v)}`
+                  }
+                }}
+              />
+              <button
+                className="join-btn"
+                onClick={() => {
+                  const el = document.querySelector('.slug-input')
+                  const v = el?.value.trim().replace(/^\/+|\/+$/g, '')
+                  if (v) window.location.href = `/${encodeURI(v)}`
+                }}
+              >
+                GO!
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="layout">
+        {children && children.length > 0 && (
+          <aside className="sidebar">
+            <ul className="sidebar-list">
+              {children.map((c) => {
+                const label = String(c).split('/').pop()
+                return (
+                  <li key={c} className="sidebar-item">
+                    <a href={`/${c}`}>{label}</a>
+                  </li>
+                )
+              })}
+            </ul>
+          </aside>
+        )}
+
+        <div
+          ref={editorRef}
+          className="editor"
+          contentEditable={!isLoading}
+          suppressContentEditableWarning
+          onInput={(event) => {
           const nextContent = event.currentTarget.innerText ?? ''
           lastLocalEditRef.current = Date.now()
 
@@ -333,6 +402,8 @@ function App() {
         }}
         spellCheck={false}
       />
+        </div>
+      )}
     </main>
   )
 }

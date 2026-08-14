@@ -20,6 +20,137 @@
   overflow: auto;
 }
 
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #071024;
+  border-right: 1px solid rgba(255,255,255,0.04);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.sidebar-header {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-item {
+  margin-bottom: 6px;
+}
+
+.sidebar-item a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.sidebar-item a:hover {
+  text-decoration: underline;
+}
+
+.welcome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.welcome-box {
+  background: #071024;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(2,6,23,0.6);
+  max-width: 560px;
+  text-align: center;
+}
+
+.welcome-box h1 {
+  margin: 0 0 8px 0;
+}
+
+.welcome-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.slug-input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: #021022;
+  color: #e2e8f0;
+  min-width: 220px;
+}
+
+.join-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #0ea5a4;
+  color: #042027;
+  cursor: pointer;
+}
+
+/* Responsive tweaks for smaller screens */
+@media (max-width: 640px) {
+  .welcome-box {
+    max-width: 92vw;
+    padding: 20px;
+  }
+
+  .welcome-box h1 {
+    font-size: 1.25rem;
+  }
+
+  .welcome-box p {
+    font-size: 0.95rem;
+  }
+
+  .slug-input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .welcome-actions {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .join-btn {
+    width: 100%;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .welcome-box {
+    padding: 14px;
+  }
+
+  .welcome-box h1 {
+    font-size: 1.05rem;
+  }
+
+  .welcome-box p {
+    font-size: 0.9rem;
+  }
+}
+
 .editor:empty::before {
   content: 'Comece a escrever...';
   color: #64748b;

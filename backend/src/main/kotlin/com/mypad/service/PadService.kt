@@ -20,4 +20,8 @@ class PadService(
         pad.updatedAt = Instant.now()
         return padRepository.save(pad)
     }
+
+    fun getChildren(parentSlug: String): List<String> {
+        return padRepository.findChildren(parentSlug)
+    }
 }

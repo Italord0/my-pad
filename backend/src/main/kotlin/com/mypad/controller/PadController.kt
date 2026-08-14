@@ -2,15 +2,9 @@ package com.mypad.controller
 
 import com.mypad.service.PadService
 import com.mypad.websocket.PadSocketMessage
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.messaging.simp.SimpMessagingTemplate
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.Instant
 
 data class PadResponse(
@@ -18,10 +12,17 @@ data class PadResponse(
     val content: String,
     val createdAt: Instant,
     val updatedAt: Instant,
+    val children: List<String> = emptyList(),
 ) {
     companion object {
-        fun fromPad(slug: String, content: String, createdAt: Instant, updatedAt: Instant): PadResponse =
-            PadResponse(slug, content, createdAt, updatedAt)
+        fun fromPad(
+            slug: String,
+            content: String,
+            createdAt: Instant,
+            updatedAt: Instant,
+            children: List<String> = emptyList()
+        ): PadResponse =
+            PadResponse(slug, content, createdAt, updatedAt, children)
     }
 }
 
@@ -33,8 +34,6 @@ data class PadUpdateRequest(
     origins = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
     ],
     allowedHeaders = ["*"],
     methods = [RequestMethod.GET, RequestMethod.PUT, RequestMethod.OPTIONS],
@@ -46,24 +45,32 @@ class PadController(
     private val messagingTemplate: SimpMessagingTemplate,
 ) {
 
-    @GetMapping("/pads/{slug}")
-    fun getPad(@PathVariable slug: String): PadResponse {
+    @GetMapping("/pads/**")
+    fun getPad(request: HttpServletRequest): PadResponse {
+        val prefix = request.contextPath + "/api/pads/"
+        val uri = request.requestURI
+        val slug = if (uri.length <= prefix.length) "meu-pad" else uri.substring(prefix.length)
         val pad = padService.getOrCreate(slug)
-        return PadResponse.fromPad(pad.slug, pad.content, pad.createdAt, pad.updatedAt)
+        val children = padService.getChildren(slug)
+        return PadResponse.fromPad(pad.slug, pad.content, pad.createdAt, pad.updatedAt, children)
     }
 
-    @PutMapping("/pads/{slug}")
+    @PutMapping("/pads/**")
     fun updatePad(
-        @PathVariable slug: String,
-        @RequestBody request: PadUpdateRequest,
-        @org.springframework.web.bind.annotation.RequestHeader("X-Sender-Id", required = false) senderId: String?,
+        request: HttpServletRequest,
+        @RequestBody body: PadUpdateRequest,
+        @RequestHeader("X-Sender-Id", required = false) senderId: String?,
     ): PadResponse {
-        val pad = padService.update(slug, request.content)
+        val prefix = request.contextPath + "/api/pads/"
+        val uri = request.requestURI
+        val slug = if (uri.length <= prefix.length) "meu-pad" else uri.substring(prefix.length)
+        val pad = padService.update(slug, body.content)
         // Broadcast update to websocket subscribers so REST updates propagate immediately
         messagingTemplate.convertAndSend(
             "/topic/pads/$slug",
             PadSocketMessage(type = "update", content = pad.content, senderId = senderId),
         )
-        return PadResponse.fromPad(pad.slug, pad.content, pad.createdAt, pad.updatedAt)
+        val children = padService.getChildren(slug)
+        return PadResponse.fromPad(pad.slug, pad.content, pad.createdAt, pad.updatedAt, children)
     }
 }

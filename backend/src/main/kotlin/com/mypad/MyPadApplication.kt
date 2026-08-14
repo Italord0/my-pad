@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
     val dbDir = Paths.get("data")
     Files.createDirectories(dbDir)
 
-    val dbFile = dbDir.resolve("dontpad.db")
+    val dbFile = dbDir.resolve("mypad.db")
     if (!Files.exists(dbFile)) {
         Files.createFile(dbFile)
     }

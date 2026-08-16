@@ -3,8 +3,8 @@ import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import './App.css'
 
-const API_BASE = 'http://localhost:8080/api'
-const WS_BASE = 'http://localhost:8080/ws/pads'
+const API_BASE = `http://${window.location.hostname}:8080/api`
+const WS_BASE = `http://${window.location.hostname}:8080/ws/pads`
 
 function App() {
   const [content, setContent] = useState('')

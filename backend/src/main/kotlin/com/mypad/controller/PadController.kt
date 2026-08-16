@@ -30,14 +30,6 @@ data class PadUpdateRequest(
     val content: String = "",
 )
 
-@CrossOrigin(
-    origins = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
-    allowedHeaders = ["*"],
-    methods = [RequestMethod.GET, RequestMethod.PUT, RequestMethod.OPTIONS],
-)
 @RestController
 @RequestMapping("/api")
 class PadController(

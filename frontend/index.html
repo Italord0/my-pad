@@ -2,9 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-black.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>mypad</title>
+    <script>
+      (function() {
+        try {
+          const path = window.location && window.location.pathname ? window.location.pathname : '';
+          const parts = path.split('/').filter(Boolean);
+          const slug = parts.length ? parts[parts.length - 1] : '';
+          document.title = slug ? `${slug} - mypad` : document.title;
+        } catch (e) {
+          // ignore
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -3,8 +3,15 @@ import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import './App.css'
 
-const API_BASE = `http://${window.location.hostname}:8080/api`
-const WS_BASE = `http://${window.location.hostname}:8080/ws/pads`
+const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss' : 'ws'
+const hostname = window.location.hostname
+const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1'
+const isPrivateIP = /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1]))/.test(hostname)
+const explicitPort = window.location.port
+const portPart = explicitPort ? `:${explicitPort}` : (isLocalHost || isPrivateIP ? ':5172' : '')
+const baseHost = `${hostname}${portPart}`
+const API_BASE = `${window.location.protocol}//${baseHost}/api`
+const WS_BASE = `${WS_PROTOCOL}://${baseHost}/ws/pads`
 
 function App() {
   const [content, setContent] = useState('')

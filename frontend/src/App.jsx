@@ -329,7 +329,7 @@ function App() {
           <div className="welcome-box">
             <h1>Welcome to MyPad</h1>
             <div className="welcome-actions">
-            <p>mypad.italomelo.dev/</p>
+            <p>{window.location.origin}/</p>
               <input
                 aria-label="slug"
                 className="slug-input"
@@ -353,6 +353,17 @@ function App() {
               </button>
             </div>
           </div>
+          <a
+            className="github-link"
+            href="https://github.com/Italord0/my-pad"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open project on GitHub"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <path d="M12 .5C5.73.5.5 5.73.5 12.02c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.7.08-.7 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.76.41-1.27.75-1.56-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11.04 11.04 0 0 1 2.9-.39c.98 0 1.97.13 2.9.39 2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.23 2.75.11 3.04.74.82 1.19 1.84 1.19 3.1 0 4.43-2.69 5.4-5.25 5.69.42.36.8 1.08.8 2.18 0 1.57-.01 2.83-.01 3.22 0 .31.21.68.8.56C20.21 21.4 23.5 17.09 23.5 12.02 23.5 5.73 18.27.5 12 .5z" />
+            </svg>
+          </a>
         </div>
       ) : (
         <div className="layout">

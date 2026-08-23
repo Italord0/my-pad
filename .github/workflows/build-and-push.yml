@@ -2,8 +2,8 @@ name: Build and push multi-arch image
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    tags:
+      - '*'
 
 jobs:
   build-and-push:

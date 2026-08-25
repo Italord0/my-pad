@@ -1,17 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
+import { resolveApiBase, resolveSockJsBase } from './networkConfig'
 import './App.css'
 
-const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss' : 'ws'
-const hostname = window.location.hostname
-const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1'
-const isPrivateIP = /^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1]))/.test(hostname)
-const explicitPort = window.location.port
-const portPart = explicitPort ? `:${explicitPort}` : (isLocalHost || isPrivateIP ? ':5172' : '')
-const baseHost = `${hostname}${portPart}`
-const API_BASE = `${window.location.protocol}//${baseHost}/api`
-const WS_BASE = `${WS_PROTOCOL}://${baseHost}/ws/pads`
+const API_BASE = resolveApiBase()
+const WS_BASE = resolveSockJsBase()
 
 function App() {
   const [content, setContent] = useState('')
@@ -153,8 +147,11 @@ function App() {
         console.debug('[STOMP] connected', { slug })
         client.subscribe(`/topic/pads/${slug}`, (message) => {
           try {
-            console.debug('[STOMP] message received', message)
             const payload = JSON.parse(message.body)
+            console.log('[SOCKET] message received for slug:', slug)
+            console.log('[SOCKET] payload:', payload)
+            console.log('[SOCKET] incoming content:', payload.content)
+            console.debug('[STOMP] message received', message)
             // if user is actively typing (recent local edits) and editor is focused,
             // buffer the remote update and apply after a short idle period to avoid
             // clobbering the user's in-progress edit.
@@ -165,6 +162,7 @@ function App() {
             const applyRemote = (remoteContent) => {
               const element = editorRef.current
               if (!element) return
+              console.log('[SOCKET] applying remote content:', remoteContent)
               const prevCaret = getCaretCharacterOffsetWithin(element)
               element.innerText = remoteContent
               setContent((current) => (remoteContent === current ? current : remoteContent))

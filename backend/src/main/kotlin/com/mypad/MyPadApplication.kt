@@ -9,10 +9,10 @@ import java.nio.file.Paths
 class MyPadApplication
 
 fun main(args: Array<String>) {
-    val dbDir = Paths.get("data")
+    val dbFile = Paths.get(System.getenv("MYPAD_DB_FILE") ?: "./data/mypad.db")
+    val dbDir = dbFile.parent ?: Paths.get(".")
     Files.createDirectories(dbDir)
 
-    val dbFile = dbDir.resolve("mypad.db")
     if (!Files.exists(dbFile)) {
         Files.createFile(dbFile)
     }

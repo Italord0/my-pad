@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mkdir -p "$(dirname "$0")/data"
-DB_FILE="$(dirname "$0")/data/mypad.db"
+DB_FILE="${MYPAD_DB_FILE:-$(dirname "$0")/data/mypad.db}"
+DB_DIR="$(dirname "$DB_FILE")"
+
+mkdir -p "$DB_DIR"
 
 if [ ! -f "$DB_FILE" ]; then
   touch "$DB_FILE"

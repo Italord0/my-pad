@@ -18,6 +18,8 @@ RUN ./gradlew bootJar -x test --no-daemon
 
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
+ENV MYPAD_DB_FILE=/data/mypad.db
 COPY --from=backend-builder /project/backend/build/libs/*.jar app.jar
+VOLUME ["/data"]
 EXPOSE 5172
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

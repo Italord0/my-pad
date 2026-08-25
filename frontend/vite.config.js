@@ -8,7 +8,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   server: {
-    port: 5172,
+    port: 5173,
     host: true,
   },
   build: {
